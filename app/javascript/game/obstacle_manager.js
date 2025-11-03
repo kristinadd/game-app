@@ -85,9 +85,56 @@ export class ObstacleManager {
 
   draw(ctx) {
     for (const obstacle of this.obstacles) {
-      ctx.fillStyle = obstacle.color
-      ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height)
+      this.drawMushroom(ctx, obstacle)
     }
+  }
+
+  drawMushroom(ctx, obstacle) {
+    const { x, y, width, height } = obstacle
+    
+    // Mushroom cap (top part - red)
+    const capHeight = height * 0.7
+    const capWidth = width * 1.2
+    const capX = x - (capWidth - width) / 2
+    const capY = y
+    
+    // Draw mushroom cap (red with white dots)
+    ctx.fillStyle = "#DC143C" // Crimson red
+    ctx.beginPath()
+    ctx.ellipse(
+      x + width / 2,           // center X
+      capY + capHeight / 2,     // center Y
+      capWidth / 2,             // radius X
+      capHeight / 2,            // radius Y
+      0,                        // rotation
+      0,                        // start angle
+      Math.PI * 2               // end angle
+    )
+    ctx.fill()
+    
+    // Draw white dots on cap
+    ctx.fillStyle = "#FFFFFF"
+    const dotSize = 4
+    const dots = [
+      { x: x + width * 0.3, y: capY + capHeight * 0.3 },
+      { x: x + width * 0.7, y: capY + capHeight * 0.25 },
+      { x: x + width * 0.5, y: capY + capHeight * 0.5 }
+    ]
+    
+    for (const dot of dots) {
+      ctx.beginPath()
+      ctx.arc(dot.x, dot.y, dotSize, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    
+    // Draw mushroom stem (white/cream)
+    const stemWidth = width * 0.4
+    const stemHeight = height * 0.3
+    const stemX = x + (width - stemWidth) / 2
+    const stemY = y + capHeight
+    
+    ctx.fillStyle = "#F5DEB3" // Wheat/cream color for stem
+    ctx.fillRect(stemX, stemY, stemWidth, stemHeight)
   }
 
   getObstacles() {
