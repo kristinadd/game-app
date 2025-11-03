@@ -20,10 +20,9 @@ export class ScoreManager {
     }
   }
 
-  updateScore(playerX, initialX) {
-    if (playerX > initialX) {
-      this.score = Math.floor((playerX - initialX) / 10)
-    }
+  updateScore(elapsedTime) {
+    // Score is based on survival time (in seconds)
+    this.score = Math.floor(elapsedTime / 100)
   }
 
   reset() {
