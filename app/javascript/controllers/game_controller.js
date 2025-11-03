@@ -31,6 +31,34 @@ export default class extends Controller {
     // Game physics constants
     this.gravity = 0.8    // How fast player falls (pixels per frame squared)
     
+    // Game state
+    this.gameOver = false  // Track if game is over
+    
+    // Initialize obstacles - objects the player must jump over
+    this.obstacles = [
+      {
+        x: 300,           // X position
+        y: this.groundLevel - 40,  // Y position (on ground, 40px tall)
+        width: 30,        // Obstacle width
+        height: 40,       // Obstacle height
+        color: "#FF6B6B"  // Red color for obstacles
+      },
+      {
+        x: 500,
+        y: this.groundLevel - 40,
+        width: 30,
+        height: 40,
+        color: "#FF6B6B"
+      },
+      {
+        x: 700,
+        y: this.groundLevel - 40,
+        width: 30,
+        height: 40,
+        color: "#FF6B6B"
+      }
+    ]
+    
     // Track which keys are currently pressed
     // This allows smooth movement when holding keys
     this.keys = {
@@ -113,8 +141,28 @@ export default class extends Controller {
     this.player.isOnGround = false  // Player is now in the air
   }
   
+  // Check collision between player and an obstacle
+  // Uses AABB (Axis-Aligned Bounding Box) collision detection
+  checkCollision(player, obstacle) {
+    // Check if player's right edge is past obstacle's left edge
+    // AND player's left edge is before obstacle's right edge
+    // AND player's bottom edge is past obstacle's top edge
+    // AND player's top edge is before obstacle's bottom edge
+    return (
+      player.x < obstacle.x + obstacle.width &&
+      player.x + player.width > obstacle.x &&
+      player.y < obstacle.y + obstacle.height &&
+      player.y + player.height > obstacle.y
+    )
+  }
+  
   // Update game state - called every frame
   update() {
+    // Don't update if game is over
+    if (this.gameOver) {
+      return
+    }
+    
     // Horizontal movement (left/right)
     if (this.keys.left) {
       this.player.x -= this.player.speed
@@ -152,6 +200,14 @@ export default class extends Controller {
     } else {
       this.player.isOnGround = false  // Player is in the air
     }
+    
+    // Check collision with obstacles
+    for (const obstacle of this.obstacles) {
+      if (this.checkCollision(this.player, obstacle)) {
+        this.gameOver = true
+        break  // Stop checking once we find a collision
+      }
+    }
   }
 
   // This method draws our player character on the canvas
@@ -163,6 +219,17 @@ export default class extends Controller {
     this.ctx.fillStyle = "#8B4513"  // Brown color for ground
     this.ctx.fillRect(0, this.groundLevel, this.canvas.width, this.canvas.height - this.groundLevel)
     
+    // Draw obstacles
+    for (const obstacle of this.obstacles) {
+      this.ctx.fillStyle = obstacle.color
+      this.ctx.fillRect(
+        obstacle.x,
+        obstacle.y,
+        obstacle.width,
+        obstacle.height
+      )
+    }
+    
     // Draw the player character using properties from the player object
     this.ctx.fillStyle = this.player.color
     
@@ -173,5 +240,24 @@ export default class extends Controller {
       this.player.width,
       this.player.height
     )
+    
+    // Draw game over message if game is over
+    if (this.gameOver) {
+      this.ctx.fillStyle = "#000000"  // Black color
+      this.ctx.font = "48px Arial"
+      this.ctx.textAlign = "center"
+      this.ctx.fillText(
+        "Game Over!",
+        this.canvas.width / 2,
+        this.canvas.height / 2
+      )
+      
+      this.ctx.font = "24px Arial"
+      this.ctx.fillText(
+        "Refresh page to restart",
+        this.canvas.width / 2,
+        this.canvas.height / 2 + 40
+      )
+    }
   }
 }
