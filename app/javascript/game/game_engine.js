@@ -16,8 +16,9 @@ export class GameEngine {
     const initialX = 50
     const initialY = groundLevel - 60
     this.player = new Player(initialX, initialY, groundLevel)
-    this.obstacleManager = new ObstacleManager(groundLevel)
+    this.obstacleManager = new ObstacleManager(groundLevel, canvas.width)
     this.scoreManager = new ScoreManager()
+    this.gameStartTime = Date.now()
     
     // Input state
     this.keys = {
@@ -35,7 +36,7 @@ export class GameEngine {
     // Update player
     this.player.update(this.gravity, this.keys)
     
-    // Keep player within canvas boundaries
+    // Keep player within canvas boundaries (can move left/right to dodge)
     if (this.player.x < 0) {
       this.player.x = 0
     }
@@ -43,8 +44,12 @@ export class GameEngine {
       this.player.x = this.canvas.width - this.player.width
     }
 
-    // Update score based on player position
-    this.scoreManager.updateScore(this.player.x, this.player.initialX)
+    // Update obstacles (move them and spawn new ones)
+    this.obstacleManager.update()
+
+    // Update score based on survival time
+    const elapsedTime = Date.now() - this.gameStartTime
+    this.scoreManager.updateScore(elapsedTime)
 
     // Check collisions
     if (CollisionDetector.checkPlayerObstacleCollision(
@@ -131,6 +136,8 @@ export class GameEngine {
     this.player.reset()
     this.gameOver = false
     this.scoreManager.reset()
+    this.obstacleManager.reset()
+    this.gameStartTime = Date.now()
     this.keys.left = false
     this.keys.right = false
     this.keys.jump = false
