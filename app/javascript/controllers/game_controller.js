@@ -11,22 +11,32 @@ export default class extends Controller {
     this.canvas = this.canvasTarget
     this.ctx = this.canvas.getContext("2d")
     
+    // Calculate ground position (bottom 15% of canvas is ground)
+    this.groundLevel = this.canvas.height - (this.canvas.height * 0.15)
+    
     // Initialize player configuration
     // This object stores all the player's properties in one place
     this.player = {
       x: 50,              // Starting X position (pixels from left)
-      y: 300,             // Starting Y position (pixels from top)
+      y: this.groundLevel - 60,  // Starting Y position (on the ground)
       width: 40,          // Player width in pixels
       height: 60,         // Player height in pixels
       color: "#FF0000",   // Player color (red)
-      speed: 5            // How many pixels the player moves per frame
+      speed: 5,           // How many pixels the player moves per frame (horizontal)
+      velocityY: 0,      // Vertical velocity (positive = down, negative = up)
+      jumpForce: -15,     // How strong the jump is (negative because up is negative Y)
+      isOnGround: true    // Track if player is on the ground
     }
+    
+    // Game physics constants
+    this.gravity = 0.8    // How fast player falls (pixels per frame squared)
     
     // Track which keys are currently pressed
     // This allows smooth movement when holding keys
     this.keys = {
       left: false,
-      right: false
+      right: false,
+      jump: false
     }
     
     // Set up keyboard event listeners
@@ -66,6 +76,12 @@ export default class extends Controller {
       this.keys.left = true
     } else if (event.key === "ArrowRight") {
       this.keys.right = true
+    } else if (event.key === " " || event.key === "Spacebar") {
+      // Spacebar to jump (only if on ground)
+      event.preventDefault() // Prevent page scroll when pressing spacebar
+      if (this.player.isOnGround) {
+        this.jump()
+      }
     }
   }
   
@@ -91,28 +107,50 @@ export default class extends Controller {
     gameLoop()  // Start the loop
   }
   
+  // Make the player jump
+  jump() {
+    this.player.velocityY = this.player.jumpForce  // Set upward velocity
+    this.player.isOnGround = false  // Player is now in the air
+  }
+  
   // Update game state - called every frame
   update() {
-    // Move player left if left arrow key is pressed
+    // Horizontal movement (left/right)
     if (this.keys.left) {
       this.player.x -= this.player.speed
     }
     
-    // Move player right if right arrow key is pressed
     if (this.keys.right) {
       this.player.x += this.player.speed
     }
     
-    // Keep player within canvas boundaries
-    // Prevent moving off the left edge
+    // Keep player within canvas boundaries (horizontal)
     if (this.player.x < 0) {
       this.player.x = 0
     }
     
-    // Prevent moving off the right edge
-    // Canvas width (800) minus player width (40) = 760
     if (this.player.x > this.canvas.width - this.player.width) {
       this.player.x = this.canvas.width - this.player.width
+    }
+    
+    // Vertical movement (gravity and jumping)
+    // Apply gravity - constantly pulls player down
+    this.player.velocityY += this.gravity
+    
+    // Update player's Y position based on velocity
+    this.player.y += this.player.velocityY
+    
+    // Ground collision detection
+    // Calculate where the bottom of the player is
+    const playerBottom = this.player.y + this.player.height
+    
+    // If player hits or goes below the ground
+    if (playerBottom >= this.groundLevel) {
+      this.player.y = this.groundLevel - this.player.height  // Snap to ground
+      this.player.velocityY = 0  // Stop falling
+      this.player.isOnGround = true  // Player is now on ground
+    } else {
+      this.player.isOnGround = false  // Player is in the air
     }
   }
 
@@ -121,8 +159,11 @@ export default class extends Controller {
     // Clear the entire canvas first
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     
+    // Draw the ground (so we can see where the player lands)
+    this.ctx.fillStyle = "#8B4513"  // Brown color for ground
+    this.ctx.fillRect(0, this.groundLevel, this.canvas.width, this.canvas.height - this.groundLevel)
+    
     // Draw the player character using properties from the player object
-    // fillStyle sets the color from the player configuration
     this.ctx.fillStyle = this.player.color
     
     // fillRect draws a filled rectangle using player's position and size
