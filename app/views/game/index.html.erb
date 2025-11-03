@@ -1,5 +1,5 @@
 <div data-controller="game">
-  <h1>My First Platformer Game!</h1>
+  <h1>Hurdle Hero! 🏃‍♂️</h1>
   
   <canvas 
     data-game-target="canvas"
@@ -8,8 +8,17 @@
     height="400"
   ></canvas>
   
-  <p style="margin-top: 1rem;">
-    <strong>Step 4:</strong> Use <strong>←</strong> and <strong>→</strong> to move, <strong>Spacebar</strong> to jump. Avoid the red obstacles!
-  </p>
+  <div style="margin-top: 1rem; display: flex; gap: 1rem; align-items: center;">
+    <p style="margin: 0;">
+      Use <strong>←</strong> and <strong>→</strong> to move, <strong>Spacebar</strong> to jump. Avoid the red obstacles!
+    </p>
+    <button 
+      data-game-target="restartButton"
+      data-action="click->game#restart"
+      style="padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 4px;"
+    >
+      Restart
+    </button>
+  </div>
 </div>
 
