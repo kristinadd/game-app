@@ -1,5 +1,22 @@
 // ObstacleManager - manages obstacles in the game (endless runner mode)
 export class ObstacleManager {
+  // Mushroom styling constants
+  static MUSHROOM_STYLE = {
+    CAP_COLOR: "#DC143C",           // Crimson red
+    STEM_COLOR: "#F5DEB3",          // Wheat/cream color
+    DOT_COLOR: "#FFFFFF",           // White
+    CAP_HEIGHT_RATIO: 0.7,          // Cap is 70% of total height
+    CAP_WIDTH_RATIO: 1.2,           // Cap is 120% of base width
+    STEM_HEIGHT_RATIO: 0.3,         // Stem is 30% of total height
+    STEM_WIDTH_RATIO: 0.4,          // Stem is 40% of base width
+    DOT_SIZE: 4,                    // Radius of white dots in pixels
+    DOT_POSITIONS: [                // Relative positions of dots on cap (0-1 scale)
+      { x: 0.3, y: 0.3 },
+      { x: 0.7, y: 0.25 },
+      { x: 0.5, y: 0.5 }
+    ]
+  }
+
   constructor(groundLevel, canvasWidth) {
     this.groundLevel = groundLevel
     this.canvasWidth = canvasWidth
@@ -91,49 +108,46 @@ export class ObstacleManager {
 
   drawMushroom(ctx, obstacle) {
     const { x, y, width, height } = obstacle
+    const style = ObstacleManager.MUSHROOM_STYLE
     
-    // Mushroom cap (top part - red)
-    const capHeight = height * 0.7
-    const capWidth = width * 1.2
-    const capX = x - (capWidth - width) / 2
-    const capY = y
+    // Calculate mushroom cap dimensions
+    const capHeight = height * style.CAP_HEIGHT_RATIO
+    const capWidth = width * style.CAP_WIDTH_RATIO
+    const capCenterX = x + width / 2
+    const capCenterY = y + capHeight / 2
     
     // Draw mushroom cap (red with white dots)
-    ctx.fillStyle = "#DC143C" // Crimson red
+    ctx.fillStyle = style.CAP_COLOR
     ctx.beginPath()
     ctx.ellipse(
-      x + width / 2,           // center X
-      capY + capHeight / 2,     // center Y
-      capWidth / 2,             // radius X
-      capHeight / 2,            // radius Y
-      0,                        // rotation
-      0,                        // start angle
-      Math.PI * 2               // end angle
+      capCenterX,              // center X
+      capCenterY,              // center Y
+      capWidth / 2,            // radius X
+      capHeight / 2,          // radius Y
+      0,                      // rotation
+      0,                      // start angle
+      Math.PI * 2             // end angle
     )
     ctx.fill()
     
     // Draw white dots on cap
-    ctx.fillStyle = "#FFFFFF"
-    const dotSize = 4
-    const dots = [
-      { x: x + width * 0.3, y: capY + capHeight * 0.3 },
-      { x: x + width * 0.7, y: capY + capHeight * 0.25 },
-      { x: x + width * 0.5, y: capY + capHeight * 0.5 }
-    ]
-    
-    for (const dot of dots) {
+    ctx.fillStyle = style.DOT_COLOR
+    for (const dotPos of style.DOT_POSITIONS) {
+      const dotX = x + width * dotPos.x
+      const dotY = y + capHeight * dotPos.y
+      
       ctx.beginPath()
-      ctx.arc(dot.x, dot.y, dotSize, 0, Math.PI * 2)
+      ctx.arc(dotX, dotY, style.DOT_SIZE, 0, Math.PI * 2)
       ctx.fill()
     }
     
     // Draw mushroom stem (white/cream)
-    const stemWidth = width * 0.4
-    const stemHeight = height * 0.3
+    const stemWidth = width * style.STEM_WIDTH_RATIO
+    const stemHeight = height * style.STEM_HEIGHT_RATIO
     const stemX = x + (width - stemWidth) / 2
     const stemY = y + capHeight
     
-    ctx.fillStyle = "#F5DEB3" // Wheat/cream color for stem
+    ctx.fillStyle = style.STEM_COLOR
     ctx.fillRect(stemX, stemY, stemWidth, stemHeight)
   }
 
