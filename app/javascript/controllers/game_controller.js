@@ -7,11 +7,19 @@ export default class extends Controller {
 
   // 'connect' is called automatically when this controller is attached to the page
   connect() {
-    console.log("Game controller connected!")
-    
     // Get the canvas element and its drawing context
     this.canvas = this.canvasTarget
     this.ctx = this.canvas.getContext("2d")
+    
+    // Initialize player configuration
+    // This object stores all the player's properties in one place
+    this.player = {
+      x: 50,              // Starting X position (pixels from left)
+      y: 300,             // Starting Y position (pixels from top)
+      width: 40,          // Player width in pixels
+      height: 60,         // Player height in pixels
+      color: "#FF0000"    // Player color (red)
+    }
     
     // Draw our first character (a red rectangle for now)
     this.draw()
@@ -22,14 +30,16 @@ export default class extends Controller {
     // Clear the entire canvas first
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     
-    // Draw a rectangle (this will be our player character)
-    // fillStyle sets the color
-    this.ctx.fillStyle = "#FF0000" // Red color
+    // Draw the player character using properties from the player object
+    // fillStyle sets the color from the player configuration
+    this.ctx.fillStyle = this.player.color
     
-    // fillRect(x, y, width, height) draws a filled rectangle
-    // x=50, y=300 means 50 pixels from left, 300 pixels from top
-    // width=40, height=60 means 40px wide, 60px tall
-    this.ctx.fillRect(50, 300, 40, 60)
+    // fillRect draws a filled rectangle using player's position and size
+    this.ctx.fillRect(
+      this.player.x,
+      this.player.y,
+      this.player.width,
+      this.player.height
+    )
   }
 }
-
