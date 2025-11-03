@@ -3,4 +3,3 @@ class GameController < ApplicationController
     # This is our main game page - simple controller action
   end
 end
-
